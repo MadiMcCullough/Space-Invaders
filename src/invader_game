@@ -11,11 +11,11 @@ pygame.init()
 screen = pygame.display.set_mode((800, 500))
 
 # Background
-background = pygame.image.load('background.jpg')
+background = pygame.image.load('background.png')
 
 
 # Sound
-mixer.music.load("background.wav")
+mixer.music.load("theinside.wav")
 mixer.music.play(-1)
 
 # Caption and Icon
