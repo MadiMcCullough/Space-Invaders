@@ -1,6 +1,11 @@
 # Space-Invaders
 A simple Space Invader- type game where the player can shoot aliens with a spaceship. 
 
+# Credit
+- Basic Invader's Game Code
+  - https://www.codingal.com/coding-for-kids/blog/space-invaders-game-using-python/
+
+
 ## Description
 This code will create a game that resembles a shoot 'em up video game like *Space Invaders*. *Space Invaders* from 1978 was an impactful game that bolstered the action game genre, and remains memorable to today. 
 
