@@ -1,5 +1,6 @@
 import math
 import random
+import PIL
 import pygame
 from pygame import mixer
 
@@ -10,7 +11,8 @@ pygame.init()
 screen = pygame.display.set_mode((800, 500))
 
 # Background
-background = pygame.image.load('background.png')
+background = pygame.image.load('background.jpg')
+
 
 # Sound
 mixer.music.load("background.wav")
