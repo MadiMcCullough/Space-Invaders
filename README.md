@@ -1,15 +1,6 @@
 # Space-Invaders
 A simple Space Invader- type game where the player can shoot aliens with a spaceship. 
 
-# Credits
-- Basic Invader's Game Code
-  - https://www.codingal.com/coding-for-kids/blog/space-invaders-game-using-python/
-- Background Music
-  - Music by: https://www.bensound.com/free-music-for-videos
-    License code: SHZ6HWLOLYAQWWE5
-- Background Image
-  - https://www.pinterest.com/pin/3940718419753511/
-
 ## Description
 This code will create a game that resembles a shoot 'em up video game like *Space Invaders*. *Space Invaders* from 1978 was an impactful game that bolstered the action game genre, and remains memorable to today. 
 
@@ -46,3 +37,12 @@ Minimal Viable Outcome:
 - Week N (Final)
   1. Add any extras to make the game more interesting. Point counter, particle effects, etc. 
   2. Add sound effects and title card. 
+
+# Credits
+- Basic Invader's Game Code
+  - https://www.codingal.com/coding-for-kids/blog/space-invaders-game-using-python/
+- Background Music
+  - Music by: https://www.bensound.com/free-music-for-videos
+    License code: SHZ6HWLOLYAQWWE5
+- Background Image
+  - https://www.pinterest.com/pin/3940718419753511/
