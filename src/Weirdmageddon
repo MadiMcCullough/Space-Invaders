@@ -7,18 +7,15 @@ import os
 
 def main():
 
-    # Intialize the pygame
+    # Initialize the pygame
     pygame.init()
 
     # Set the game to full screen
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-    # Background
-    background = pygame.image.load("background.png").convert()
-    # Display the background after instructions quit
-    screen.blit(background, (0, 0))
-    pygame.display.update()
-
+    # Load and scale the background image to fit the screen
+    background = pygame.image.load(os.path.join("background.png"))  # Ensure the file is in the correct folder
+    background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
 
     # Sound
     def play_main_music():
@@ -29,8 +26,6 @@ def main():
     # Play intro music
     intro_music = mixer.Sound(os.path.join("intro_music.wav"))  
     intro_music.play()
-
-    # Event to trigger main music (removed unused function)
 
     # Display instructions before the game starts
     instructions_font = pygame.font.Font('freesansbold.ttf', 32)
@@ -46,6 +41,7 @@ def main():
 
     def display_instructions():
         screen.fill((0, 0, 0))
+        screen.blit(background, (0, 0))  # Display the background image
         y_offset = (screen.get_height() - len(instructions_text) * 50) // 2  # Center vertically
         glitch_offset = 0  # Offset for glitch effect
         for line in instructions_text:
@@ -101,14 +97,6 @@ def main():
             play_main_music()
             break
         display_instructions()
-
-    # Set the screen size to the current display size
-    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    screen.fill((0, 0, 0))  # Clear the screen
-    resized_background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))  # Resize the background to fit the screen
-    screen.blit(resized_background, (0, 0))  # Display the resized background
-    pygame.display.update()  # Update the display
-
 
     # Caption and Icon
     pygame.display.set_caption("Weirdmageddon")
