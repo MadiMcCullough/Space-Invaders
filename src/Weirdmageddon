@@ -104,9 +104,14 @@ def main():
 
     # Set the screen size to the current display size
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    screen.fill((0, 0, 0))  # Clear the screen
+    resized_background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))  # Resize the background to fit the screen
+    screen.blit(resized_background, (0, 0))  # Display the resized background
+    pygame.display.update()  # Update the display
+
 
     # Caption and Icon
-    pygame.display.set_caption("Space Invader")
+    pygame.display.set_caption("Weirdmageddon")
     icon = pygame.image.load("bill_cipher.png")
     pygame.display.set_icon(icon)
 
@@ -139,16 +144,12 @@ def main():
     spawn_enemies(num_of_enemies)
 
     # Bullet
-    # Ready - You can't see the bullet on the screen
-    # Fire - The bullet is currently moving
     bulletImg = pygame.image.load("nyan_cat.png") 
     bulletX = 0
     bulletY = playerY  # Ensure playerY is defined
-    # Removed unused bulletX_change variable
     bulletY_change = 10
     bullet_state = "ready"
 
-    # Removed unused bulletX_change variable
     score_value = 0
     font = pygame.font.Font('freesansbold.ttf', 32)
     textX = 10
@@ -183,15 +184,11 @@ def main():
         return distance < size // 2  # Adjust collision detection based on enemy size
 
     def isGameOver(enemyX, enemyY, playerX, playerY):
-        # Check if enemy hits the player
         player_collision_distance = 50  # Adjust based on player size
         distance = math.sqrt(math.pow(enemyX - playerX, 2) + (math.pow(enemyY - playerY, 2)))
-        if distance < player_collision_distance:
-            return True
-        return False
+        return distance < player_collision_distance
     
     def pixelated_burst(x, y):
-        # Generate a list of particles for the burst effect
         particles = []
         for _ in range(20):  # Number of particles
             particle = {
@@ -205,34 +202,29 @@ def main():
             }
             particles.append(particle)
         return particles
-    # List to store active particles for pixelated burst effects
+
     active_particles = []
 
     running = True
     while running:
-        # RGB = Red, Green, Blue
         screen.fill((0, 0, 0))
-
         screen.blit(background, (0, 0))  # Use the preloaded background image
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-            # if keystroke is pressed check whether its right or left
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     playerX_change = -5
                 if event.key == pygame.K_RIGHT:
                     playerX_change = 5
-
                 if event.key == pygame.K_SPACE:
                     if bullet_state == "ready":
                         bulletSound = mixer.Sound("laser.wav")  # Ensure the file is in an 'assets' folder
-                        bulletSound.set_volume(0.2)  # Set the volume to make the laser quieter
+                        bulletSound.set_volume(0.2)
                         bulletSound.play()
-                        fire_bullet(playerX, bulletY)  # Use playerX for bulletX
-
-                if event.key == pygame.K_ESCAPE:  # Exit the game when ESC is pressed
+                        fire_bullet(playerX, bulletY)
+                if event.key == pygame.K_ESCAPE:
                     running = False
 
             if event.type == pygame.KEYUP:
@@ -245,7 +237,7 @@ def main():
         elif playerX >= screen.get_width() - 100:
             playerX = screen.get_width() - 100
 
-        for i in range(len(enemyX)):  # Loop through enemies
+        for i in range(len(enemyX)):
             if isGameOver(enemyX[i], enemyY[i], playerX, playerY):
                 game_over_text()
                 running = False
@@ -253,11 +245,24 @@ def main():
 
             enemyX[i] += enemyX_change[i]
             if enemyX[i] <= 0:
-                enemyX_change[i] = random.choice([6, 7, 8, 9])  # Randomize speed when changing direction
+                enemyX_change[i] = random.choice([6, 7, 8, 9])
                 enemyY[i] += enemyY_change[i]
             elif enemyX[i] >= screen.get_width() - enemySize[i]:
-                enemyX_change[i] = -random.choice([6, 7, 8, 9])  # Randomize speed when changing direction
+                enemyX_change[i] = -random.choice([6, 7, 8, 9])
             collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY, enemySize[i])
+
+            if collision:
+                explosionSound = mixer.Sound(os.path.join("explosion.wav"))  
+                explosionSound.set_volume(0.3)
+                explosionSound.play()
+                active_particles.extend(pixelated_burst(enemyX[i], enemyY[i]))
+                score_value += 1
+                enemyY[i] = random.randint(50, 150)
+                enemySize[i] = random.randint(150, 200)
+                enemyX_change[i] = random.choice([6, 7, 8, 9])
+            enemy(enemyX[i], enemyY[i], i)
+
+        if bulletY < 0:
 
             if collision:
                 explosionSound = mixer.Sound(os.path.join("explosion.wav"))  
