@@ -16,6 +16,7 @@ def main():
     # Load and scale the background image to fit the screen
     background = pygame.image.load(os.path.join("background.png"))  # Ensure the file is in the correct folder
     background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
+    screen.blit(background, (0, 0))
 
     # Sound
     def play_main_music():
