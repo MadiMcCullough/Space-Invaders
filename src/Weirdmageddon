@@ -13,10 +13,12 @@ def main():
     # Set the game to full screen
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-    # Load and scale the background image to fit the screen
-    background = pygame.image.load(os.path.join("background.png"))  # Ensure the file is in the correct folder
-    background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
+    background = pygame.image.load(os.path.join("background1.png"))
+    new_width = int(screen.get_width())
+    new_height = int(screen.get_height())
+    background = pygame.transform.scale(background, (new_width, new_height))
     screen.blit(background, (0, 0))
+    pygame.display.update()
 
     # Sound
     def play_main_music():
