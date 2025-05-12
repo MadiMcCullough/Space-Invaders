@@ -124,7 +124,7 @@ def main():
             enemyImg.append(pygame.transform.scale(original_enemy_img, (size, size)))
             enemyX.append(random.randint(0, screen.get_width() - size))  # Adjust to fit screen width
             enemyY.append(random.randint(50, 150))  # Ensure enemies appear near the top
-            enemyX_change.append(random.choice([4, 5, 6, 7]))  # Increased speed for horizontal movement
+            enemyX_change.append(random.choice([6, 7, 8, 9]))  # Increased speed for horizontal movement
             enemyY_change.append(40)
             enemySize.append(size)
 
@@ -231,10 +231,10 @@ def main():
 
             enemyX[i] += enemyX_change[i]
             if enemyX[i] <= 0:
-                enemyX_change[i] = random.choice([4, 5, 6, 7])  # Randomize speed when changing direction
+                enemyX_change[i] = random.choice([6, 7, 8, 9])  # Randomize speed when changing direction
                 enemyY[i] += enemyY_change[i]
             elif enemyX[i] >= screen.get_width() - enemySize[i]:
-                enemyX_change[i] = -random.choice([4, 5, 6, 7])  # Randomize speed when changing direction
+                enemyX_change[i] = -random.choice([6, 7, 8, 9])  # Randomize speed when changing direction
                 enemyY[i] += enemyY_change[i]
 
             # Collision
@@ -258,7 +258,7 @@ def main():
                 enemyX[i] = random.randint(0, screen.get_width() - size)
                 enemyY[i] = random.randint(50, 150)
                 enemySize[i] = size
-                enemyX_change[i] = random.choice([4, 5, 6, 7])  # Assign new random speed
+                enemyX_change[i] = random.choice([6, 7, 8, 9])  # Assign new random speed
 
             enemy(enemyX[i], enemyY[i], i)
 
