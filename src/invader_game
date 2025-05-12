@@ -1,10 +1,11 @@
 import math
 import random
-# Removed unused PIL import
 import pygame
 from pygame import mixer
+from matplotlib import font_manager
 
 def main():
+
     # Intialize the pygame
     pygame.init()
 
@@ -19,13 +20,11 @@ def main():
     def play_main_music():
         mixer.music.load("gf_themesong.wav")
         mixer.music.play(-1)
-        mixer.music.set_volume(0.3)
+        mixer.music.set_volume(0.2)
 
     # Play intro music
     intro_music = mixer.Sound("intro_music.wav")
     intro_music.play()
-
-  
 
     # Event to trigger main music
     def handle_music_events():
@@ -35,21 +34,50 @@ def main():
 
     # Display instructions before the game starts
     instructions_font = pygame.font.Font('freesansbold.ttf', 32)
+    hoefler_font_path = font_manager.findfont("Hoefler Text")  # Find the path to Hoefler Text font
+    hoefler_font = pygame.font.Font(hoefler_font_path, 32) if hoefler_font_path else instructions_font
+
     instructions_text = [
-        "Welcome to Weirdmageddon!",
-        "Use LEFT and RIGHT arrow keys to move.",
-        "Press SPACE to shoot.",
-        "Press any key to start the game."
+        ("Welcome to ", "Weirdmageddon!"),
+        ("Use LEFT and RIGHT arrow keys to move.", ""),
+        ("Press SPACE to shoot.", ""),
+        ("Press any key to start the game.", "")
     ]
 
     def display_instructions():
         screen.fill((0, 0, 0))
         y_offset = (screen.get_height() - len(instructions_text) * 50) // 2  # Center vertically
+        glitch_offset = 0  # Offset for glitch effect
         for line in instructions_text:
-            text_surface = instructions_font.render(line, True, (255, 255, 255))
-            text_rect = text_surface.get_rect(center=(screen.get_width() // 2, y_offset))
-            screen.blit(text_surface, text_rect)
+            if "Weirdmageddon" in line[1]:
+                # Render "Weirdmageddon" with Hoefler Text font and add glitch effect
+                text_surface1 = instructions_font.render(line[0], True, (255, 255, 255))
+                text_surface2 = hoefler_font.render(line[1], True, (255, 0, 0))  # Red for glitch effect
+                text_surface3 = hoefler_font.render(line[1], True, (0, 255, 0))  # Green for glitch effect
+                text_surface4 = hoefler_font.render(line[1], True, (0, 0, 255))  # Blue for glitch effect
+
+                text_rect1 = text_surface1.get_rect(center=(screen.get_width() // 2 - 120, y_offset))  # Adjusted position
+                text_rect2 = text_surface2.get_rect(center=(screen.get_width() // 2 + 120 + glitch_offset, y_offset))
+                text_rect3 = text_surface3.get_rect(center=(screen.get_width() // 2 + 120 - glitch_offset, y_offset + 2))
+                text_rect4 = text_surface4.get_rect(center=(screen.get_width() // 2 + 120, y_offset - 2))
+
+                screen.blit(text_surface1, text_rect1)
+
+                # Randomly show/hide glitch layers
+                if random.random() > 0.5:
+                    screen.blit(text_surface2, text_rect2)
+                if random.random() > 0.5:
+                    screen.blit(text_surface3, text_rect3)
+                if random.random() > 0.5:
+                    screen.blit(text_surface4, text_rect4)
+
+                glitch_offset = random.randint(-5, 5)  # Randomize glitch offset
+            else:
+                text_surface = instructions_font.render(" ".join(line), True, (255, 255, 255))
+                text_rect = text_surface.get_rect(center=(screen.get_width() // 2, y_offset))
+                screen.blit(text_surface, text_rect)
             y_offset += 50
+
         pygame.display.update()
 
     display_instructions()
@@ -65,7 +93,7 @@ def main():
                 waiting = False
                 intro_music.stop()  # Stop the intro music when instructions end
                 play_main_music()  # Start the main music after instructions
-
+        display_instructions()
 
     # Caption and Icon
     pygame.display.set_caption("Space Invader")
@@ -95,7 +123,7 @@ def main():
         enemyImg.append(pygame.transform.scale(original_enemy_img, (size, size)))
         enemyX.append(random.randint(0, screen.get_width() - size))  # Adjust to fit screen width
         enemyY.append(random.randint(50, 150))  # Ensure enemies appear near the top
-        enemyX_change.append(4)
+        enemyX_change.append(random.choice([4, 5, 6, 7]))  # Increased speed for horizontal movement
         enemyY_change.append(40)
         enemySize.append(size)
 
@@ -103,7 +131,7 @@ def main():
     # Ready - You can't see the bullet on the screen
     # Fire - The bullet is currently moving
     bulletImg = pygame.image.load('nyan_cat.png')
-    bulletImg = pygame.transform.scale(bulletImg, (120, 120))  # Increased bullet size
+    bulletImg = pygame.transform.scale(bulletImg, (140, 140))  # Slightly increased bullet size
     bulletX = 0
     bulletY = playerY
     bulletX_change = 0
@@ -172,6 +200,7 @@ def main():
                 if event.key == pygame.K_SPACE:
                     if bullet_state == "ready":
                         bulletSound = mixer.Sound("laser.wav")
+                        bulletSound.set_volume(0.2)  # Set the volume to make the laser quieter
                         bulletSound.play()
                         # Get the current x coordinate of the spaceship
                         bulletX = playerX
@@ -199,25 +228,56 @@ def main():
 
             enemyX[i] += enemyX_change[i]
             if enemyX[i] <= 0:
-                enemyX_change[i] = 4
+                enemyX_change[i] = random.choice([4, 5, 6, 7])  # Randomize speed when changing direction
                 enemyY[i] += enemyY_change[i]
             elif enemyX[i] >= screen.get_width() - enemySize[i]:
-                enemyX_change[i] = -4
+                enemyX_change[i] = -random.choice([4, 5, 6, 7])  # Randomize speed when changing direction
                 enemyY[i] += enemyY_change[i]
 
             # Collision
             collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY, enemySize[i])
             if collision:
                 explosionSound = mixer.Sound("explosion.wav")
+                explosionSound.set_volume(0.3)
                 explosionSound.play()
                 bulletY = playerY
                 bullet_state = "ready"
                 score_value += 1
+
+                # Pixelated effect with larger fragments and even longer lifespan
+                fragments = []
+                fragment_lifespans = []  # Track lifespan of each fragment
+                for _ in range(30):  # Create 30 larger pixelated fragments
+                    fragment_size = random.randint(10, 50)  # Larger size for fragments
+                    fragment_x = enemyX[i] + random.randint(0, enemySize[i] - fragment_size)
+                    fragment_y = enemyY[i] + random.randint(0, enemySize[i] - fragment_size)
+                    fragment_color = (random.randint(150, 255), random.randint(150, 255), random.randint(150, 255))
+                    fragments.append([fragment_x, fragment_y, fragment_size, fragment_color])
+                    fragment_lifespans.append(120)  # Set even longer lifespan for each fragment (e.g., 120 frames)
+
+                # Draw fragments and fade them out
+                updated_fragments = []
+                updated_lifespans = []
+                for idx, fragment in enumerate(fragments):
+                    if fragment_lifespans[idx] > 0:  # Only process fragments with remaining lifespan
+                        fragment_color = (
+                            max(fragment[3][0] - 1, 0),
+                            max(fragment[3][1] - 1, 0),
+                            max(fragment[3][2] - 1, 0),
+                        )  # Gradually fade color more slowly
+                        pygame.draw.rect(screen, fragment_color, (fragment[0], fragment[1], fragment[2], fragment[2]))
+                        updated_fragments.append([fragment[0], fragment[1], fragment[2], fragment_color])
+                        updated_lifespans.append(fragment_lifespans[idx] - 1)  # Decrease lifespan more slowly
+                fragments = updated_fragments
+                fragment_lifespans = updated_lifespans
+
+                # Respawn enemy
                 size = random.randint(150, 200)  # Generate new size for respawned enemy
                 enemyImg[i] = pygame.transform.scale(pygame.image.load('bill_cipher.png'), (size, size))
                 enemyX[i] = random.randint(0, screen.get_width() - size)
                 enemyY[i] = random.randint(50, 150)
                 enemySize[i] = size
+                enemyX_change[i] = random.choice([4, 5, 6, 7])  # Assign new random speed
 
             enemy(enemyX[i], enemyY[i], i)
 
