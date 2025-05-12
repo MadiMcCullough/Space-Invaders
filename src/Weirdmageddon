@@ -26,11 +26,7 @@ def main():
     intro_music = mixer.Sound("intro_music.wav")
     intro_music.play()
 
-    # Event to trigger main music
-    def handle_music_events():
-        for event in pygame.event.get():
-            if event.type == pygame.USEREVENT + 1:
-                play_main_music()
+    # Event to trigger main music (removed unused function)
 
     # Display instructions before the game starts
     instructions_font = pygame.font.Font('freesansbold.ttf', 32)
@@ -143,7 +139,7 @@ def main():
     bulletY_change = 10
     bullet_state = "ready"
 
-    # Score
+    # Removed unused bulletX_change variable
     score_value = 0
     font = pygame.font.Font('freesansbold.ttf', 32)
     textX = 10
@@ -189,15 +185,7 @@ def main():
         over_font = pygame.font.Font('freesansbold.ttf', 64)  # Define over_font
         win_text = over_font.render("YOU SAVED THE TOWN!", True, (0, 255, 0))
         screen.blit(win_text, (screen.get_width() // 2 - win_text.get_width() // 2, screen.get_height() // 2 - win_text.get_height() // 2))
-        pygame.display.update()
-        win_sound = mixer.Sound("win_sound.wav")
-        win_sound.set_volume(0.3)  # Adjust volume if needed
-        win_sound.play()
-        pygame.time.wait(3000)  # Wait for 3 seconds before exiting
-
-    # Game Loop
-    running = True
-    active_particles = []  # List to store active particles
+    # Removed unused win_game_text function
 
     def pixelated_burst(x, y):
         # Generate a list of particles for the burst effect
@@ -214,6 +202,9 @@ def main():
             }
             particles.append(particle)
         return particles
+    # List to store active particles for pixelated burst effects
+    active_particles = []
+
     while running:
         # RGB = Red, Green, Blue
         screen.fill((0, 0, 0))
