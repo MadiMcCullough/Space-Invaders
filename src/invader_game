@@ -117,15 +117,18 @@ def main():
     enemySize = []  # List to store enemy sizes
     num_of_enemies = 6
 
-    for i in range(num_of_enemies):
-        original_enemy_img = pygame.image.load('bill_cipher.png')
-        size = random.randint(150, 200)  # Increased size range for enemies
-        enemyImg.append(pygame.transform.scale(original_enemy_img, (size, size)))
-        enemyX.append(random.randint(0, screen.get_width() - size))  # Adjust to fit screen width
-        enemyY.append(random.randint(50, 150))  # Ensure enemies appear near the top
-        enemyX_change.append(random.choice([4, 5, 6, 7]))  # Increased speed for horizontal movement
-        enemyY_change.append(40)
-        enemySize.append(size)
+    def spawn_enemies():
+        for i in range(num_of_enemies):
+            original_enemy_img = pygame.image.load('bill_cipher.png')
+            size = random.randint(150, 200)  # Increased size range for enemies
+            enemyImg.append(pygame.transform.scale(original_enemy_img, (size, size)))
+            enemyX.append(random.randint(0, screen.get_width() - size))  # Adjust to fit screen width
+            enemyY.append(random.randint(50, 150))  # Ensure enemies appear near the top
+            enemyX_change.append(random.choice([4, 5, 6, 7]))  # Increased speed for horizontal movement
+            enemyY_change.append(40)
+            enemySize.append(size)
+
+    spawn_enemies()
 
     # Bullet
     # Ready - You can't see the bullet on the screen
@@ -220,7 +223,7 @@ def main():
             playerX = screen.get_width() - 100
 
         # Enemy Movement
-        for i in range(num_of_enemies):
+        for i in range(len(enemyX)):
             if isGameOver(enemyX[i], enemyY[i], playerX, playerY):
                 game_over_text()
                 running = False
@@ -244,32 +247,10 @@ def main():
                 bullet_state = "ready"
                 score_value += 1
 
-                # Pixelated effect with larger fragments and even longer lifespan
-                fragments = []
-                fragment_lifespans = []  # Track lifespan of each fragment
-                for _ in range(30):  # Create 30 larger pixelated fragments
-                    fragment_size = random.randint(10, 50)  # Larger size for fragments
-                    fragment_x = enemyX[i] + random.randint(0, enemySize[i] - fragment_size)
-                    fragment_y = enemyY[i] + random.randint(0, enemySize[i] - fragment_size)
-                    fragment_color = (random.randint(150, 255), random.randint(150, 255), random.randint(150, 255))
-                    fragments.append([fragment_x, fragment_y, fragment_size, fragment_color])
-                    fragment_lifespans.append(120)  # Set even longer lifespan for each fragment (e.g., 120 frames)
-
-                # Draw fragments and fade them out
-                updated_fragments = []
-                updated_lifespans = []
-                for idx, fragment in enumerate(fragments):
-                    if fragment_lifespans[idx] > 0:  # Only process fragments with remaining lifespan
-                        fragment_color = (
-                            max(fragment[3][0] - 1, 0),
-                            max(fragment[3][1] - 1, 0),
-                            max(fragment[3][2] - 1, 0),
-                        )  # Gradually fade color more slowly
-                        pygame.draw.rect(screen, fragment_color, (fragment[0], fragment[1], fragment[2], fragment[2]))
-                        updated_fragments.append([fragment[0], fragment[1], fragment[2], fragment_color])
-                        updated_lifespans.append(fragment_lifespans[idx] - 1)  # Decrease lifespan more slowly
-                fragments = updated_fragments
-                fragment_lifespans = updated_lifespans
+                # Check if score is a multiple of 20 to double enemies
+                if score_value % 20 == 0:
+                    num_of_enemies *= 2
+                    spawn_enemies()
 
                 # Respawn enemy
                 size = random.randint(150, 200)  # Generate new size for respawned enemy
