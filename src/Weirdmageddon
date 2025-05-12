@@ -2,7 +2,7 @@ import math
 import random
 import pygame
 from pygame import mixer
-from matplotlib import font_manager
+import os
 
 def main():
 
@@ -13,25 +13,24 @@ def main():
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
     # Background
-    background = pygame.image.load('background.png')
-    background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
+    background = pygame.image.load(os.path.join(os.path.dirname(__file__), "background.png"))
 
     # Sound
     def play_main_music():
-        mixer.music.load("gf_themesong.wav")
+        mixer.music.load(os.path.join(os.path.dirname(__file__), "gf_themesong.wav"))  # Ensure the file is in an 'assets' folder
         mixer.music.play(-1)
         mixer.music.set_volume(0.2)
 
     # Play intro music
-    intro_music = mixer.Sound("intro_music.wav")
+    intro_music = mixer.Sound(os.path.join(os.path.dirname(__file__), "intro_music.wav"))  # Ensure the file is in an 'assets' folder
     intro_music.play()
 
     # Event to trigger main music (removed unused function)
 
     # Display instructions before the game starts
     instructions_font = pygame.font.Font('freesansbold.ttf', 32)
-    hoefler_font_path = font_manager.findfont("Hoefler Text")  # Find the path to Hoefler Text font
-    hoefler_font = pygame.font.Font(hoefler_font_path, 32) if hoefler_font_path else instructions_font
+    hoefler_font_path = os.path.join(os.path.dirname(__file__), "fonts", "HoeflerText.ttf")  # Ensure the font file is in a 'fonts' folder
+    hoefler_font = pygame.font.Font(hoefler_font_path, 32) if os.path.exists(hoefler_font_path) else instructions_font
 
     instructions_text = [
         ("Welcome to ", "Weirdmageddon!"),
@@ -90,17 +89,22 @@ def main():
                 intro_music.stop()  # Stop the intro music when instructions end
                 play_main_music()  # Start the main music after instructions
                 break  # Exit the loop immediately
+        keys = pygame.key.get_pressed()
+        if any(keys):  # Quit instructions if any key is pressed
+            waiting = False
+            intro_music.stop()
+            play_main_music()
+            break
         display_instructions()
+
 
     # Caption and Icon
     pygame.display.set_caption("Space Invader")
-    icon = pygame.image.load('bill_cipher.png')
-    icon = pygame.transform.scale(icon, (50, 50)) 
+    icon = pygame.image.load(os.path.join(os.path.dirname(__file__), "bill_cipher.png"))  # Ensure the file is in an 'assets' folder
     pygame.display.set_icon(icon)
 
     # Player
-    playerImg = pygame.image.load('mabel_and_dipper.png')
-    playerImg = pygame.transform.scale(playerImg, (100, 200))  # Resize the image to 200x200 pixels
+    playerImg = pygame.image.load(os.path.join(os.path.dirname(__file__), "mabel_and_dipper.png"))  # Ensure the file is in an 'assets' folder
     playerX = (screen.get_width() - 200) // 2  # Center horizontally
     playerY = screen.get_height() - 220  # Position near the bottom
     playerX_change = 0
@@ -117,25 +121,23 @@ def main():
     def spawn_enemies(count=5):
         nonlocal enemyImg, enemyX, enemyY, enemyX_change, enemyY_change, enemySize  # Ensure variables are accessible
         for _ in range(count):
-            original_enemy_img = pygame.image.load('bill_cipher.png')
             size = random.randint(150, 200)  # Increased size range for enemies
-            enemyImg.append(pygame.transform.scale(original_enemy_img, (size, size)))
             enemyX.append(random.randint(0, screen.get_width() - size))  # Adjust to fit screen width
             enemyY.append(random.randint(50, 150))  # Ensure enemies appear near the top
             enemyX_change.append(random.choice([6, 7, 8, 9]))  # Increased speed for horizontal movement
             enemyY_change.append(40)
             enemySize.append(size)
+            enemyImg.append(pygame.image.load(os.path.join(os.path.dirname(__file__), "bill_cipher.png")))  # Ensure the file is in an 'assets' folder
 
     spawn_enemies(num_of_enemies)
 
     # Bullet
     # Ready - You can't see the bullet on the screen
     # Fire - The bullet is currently moving
-    bulletImg = pygame.image.load('nyan_cat.png')
-    bulletImg = pygame.transform.scale(bulletImg, (140, 140))  # Slightly increased bullet size
+    bulletImg = pygame.image.load(os.path.join(os.path.dirname(__file__), "nyan_cat.png")) 
     bulletX = 0
     bulletY = playerY  # Ensure playerY is defined
-    bulletX_change = 0
+    # Removed unused bulletX_change variable
     bulletY_change = 10
     bullet_state = "ready"
 
@@ -181,12 +183,6 @@ def main():
             return True
         return False
     
-    def win_game_text(screen):
-        over_font = pygame.font.Font('freesansbold.ttf', 64)  # Define over_font
-        win_text = over_font.render("YOU SAVED THE TOWN!", True, (0, 255, 0))
-        screen.blit(win_text, (screen.get_width() // 2 - win_text.get_width() // 2, screen.get_height() // 2 - win_text.get_height() // 2))
-    # Removed unused win_game_text function
-
     def pixelated_burst(x, y):
         # Generate a list of particles for the burst effect
         particles = []
@@ -205,14 +201,12 @@ def main():
     # List to store active particles for pixelated burst effects
     active_particles = []
 
+    running = True
     while running:
         # RGB = Red, Green, Blue
         screen.fill((0, 0, 0))
 
-        if 'background' in locals() or 'background' in globals():  # Ensure background is loaded
-            background = pygame.image.load('background.png')  # Load background if not already loaded
-            background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
-            screen.blit(background, (0, 0))
+        screen.blit(background, (0, 0))  # Use the preloaded background image
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -226,7 +220,7 @@ def main():
 
                 if event.key == pygame.K_SPACE:
                     if bullet_state == "ready":
-                        bulletSound = mixer.Sound("laser.wav")
+                        bulletSound = mixer.Sound(os.path.join(os.path.dirname(__file__), "laser.wav"))  # Ensure the file is in an 'assets' folder
                         bulletSound.set_volume(0.2)  # Set the volume to make the laser quieter
                         bulletSound.play()
                         fire_bullet(playerX, bulletY)  # Use playerX for bulletX
@@ -259,7 +253,7 @@ def main():
             collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY, enemySize[i])
 
             if collision:
-                explosionSound = mixer.Sound("explosion.wav")
+                explosionSound = mixer.Sound(os.path.join(os.path.dirname(__file__), "explosion.wav"))  # Ensure the file is in an 'assets' folder
                 explosionSound.set_volume(0.3)
                 explosionSound.play()
                 active_particles.extend(pixelated_burst(enemyX[i], enemyY[i]))  # Add particles to active list
