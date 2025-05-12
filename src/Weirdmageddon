@@ -2,83 +2,73 @@ import math
 import random
 import pygame
 from pygame import mixer
-from PIL import Image
 import os
-def main():
 
-    # Initialize the pygame
+def main():
+    # Initialize pygame
     pygame.init()
 
-    # Set the game to full screen
+    # Set up the screen
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    clock = pygame.time.Clock()
 
-    background = pygame.image.load(os.path.join(os.getcwd(), "background.png"))
-    background = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    screen.blit(background, (0, 0))
-    pygame.display.update()
+    # Load assets with error handling
+    def load_asset(path, asset_type="image"):
+        try:
+            if asset_type == "image":
+                return pygame.image.load(path)
+            elif asset_type == "sound":
+                return mixer.Sound(path)
+            elif asset_type == "music":
+                mixer.music.load(path)
+        except pygame.error as e:
+            print(f"Error loading {asset_type} at {path}: {e}")
+            exit()
 
-    # Sound
-    def play_main_music():
-        mixer.music.load(os.path.join("gf_themesong.wav"))  
-        mixer.music.play(-1)
-        mixer.music.set_volume(0.2)
+    # Load background
+    background_path = os.path.join(os.getcwd(), "background.png")
+    background = load_asset(background_path)
+    background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
 
-    # Play intro music
-    intro_music = mixer.Sound(os.path.join("intro_music.wav"))  
-    intro_music.play()
+    # Sound setup
+    intro_music = load_asset(os.path.join(os.getcwd(), "intro_music.wav"), "sound")
+    gf_themesong = os.path.join(os.getcwd(), "gf_themesong.wav")
+    explosion_sound = load_asset(os.path.join(os.getcwd(), "explosion.wav"), "sound")
+    laser_sound = load_asset(os.path.join(os.getcwd(), "laser.wav"), "sound")
 
-    # Display instructions before the game starts
-    instructions_font = pygame.font.Font('freesansbold.ttf', 32)
-    hoefler_font_path = os.path.join("fonts", "HoeflerText.ttf")  # Ensure the font file is in a 'fonts' folder
-    hoefler_font = pygame.font.Font(hoefler_font_path, 32) if os.path.exists(hoefler_font_path) else instructions_font
+    def play_music(path, loop=-1, volume=0.2):
+        mixer.music.load(path)
+        mixer.music.set_volume(volume)
+        mixer.music.play(loop)
 
-    instructions_text = [
-        ("Welcome to ", "Weirdmageddon!"),
-        ("Use LEFT and RIGHT arrow keys to move.", ""),
-        ("Press SPACE to shoot.", ""),
-        ("Press any key to start the game.", "")
-    ]
+    def stop_music():
+        mixer.music.stop()
 
+    # Display instructions
     def display_instructions():
+        instructions_font = pygame.font.Font('freesansbold.ttf', 32)
+        instructions_text = [
+            "Welcome to Weirdmageddon!",
+            "Use LEFT and RIGHT arrow keys to move.",
+            "Press SPACE to shoot.",
+            "Press any key to start the game."
+        ]
+
         screen.fill((0, 0, 0))
-        screen.blit(background, (0, 0))  # Display the background image
-        y_offset = (screen.get_height() - len(instructions_text) * 50) // 2  # Center vertically
-        glitch_offset = 0  # Offset for glitch effect
+        screen.blit(background, (0, 0))
+        y_offset = (screen.get_height() - len(instructions_text) * 50) // 2
+
         for line in instructions_text:
-            if "Weirdmageddon" in line[1]:
-                # Render "Weirdmageddon" with Hoefler Text font and add glitch effect
-                text_surface1 = instructions_font.render(line[0], True, (255, 255, 255))
-                text_surface2 = hoefler_font.render(line[1], True, (255, 0, 0))  # Red for glitch effect
-                text_surface3 = hoefler_font.render(line[1], True, (0, 255, 0))  # Green for glitch effect
-                text_surface4 = hoefler_font.render(line[1], True, (0, 0, 255))  # Blue for glitch effect
-
-                text_rect1 = text_surface1.get_rect(center=(screen.get_width() // 2 - 120, y_offset))  # Adjusted position
-                text_rect2 = text_surface2.get_rect(center=(screen.get_width() // 2 + 120 + glitch_offset, y_offset))
-                text_rect3 = text_surface3.get_rect(center=(screen.get_width() // 2 + 120 - glitch_offset, y_offset + 2))
-                text_rect4 = text_surface4.get_rect(center=(screen.get_width() // 2 + 120, y_offset - 2))
-
-                screen.blit(text_surface1, text_rect1)
-
-                # Randomly show/hide glitch layers
-                if random.random() > 0.5:
-                    screen.blit(text_surface2, text_rect2)
-                if random.random() > 0.5:
-                    screen.blit(text_surface3, text_rect3)
-                if random.random() > 0.5:
-                    screen.blit(text_surface4, text_rect4)
-
-                glitch_offset = random.randint(-5, 5)  # Randomize glitch offset
-            else:
-                text_surface = instructions_font.render(" ".join(line), True, (255, 255, 255))
-                text_rect = text_surface.get_rect(center=(screen.get_width() // 2, y_offset))
-                screen.blit(text_surface, text_rect)
+            text_surface = instructions_font.render(line, True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(screen.get_width() // 2, y_offset))
+            screen.blit(text_surface, text_rect)
             y_offset += 50
 
         pygame.display.update()
 
+    # Show instructions and wait for key press
+    intro_music.play()
     display_instructions()
-
-    # Wait for the player to press any key to start
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -87,116 +77,76 @@ def main():
                 exit()
             if event.type == pygame.KEYDOWN:
                 waiting = False
-                intro_music.stop()  # Stop the intro music when instructions end
-                play_main_music()  # Start the main music after instructions
-                break  # Exit the loop immediately
-        keys = pygame.key.get_pressed()
-        if any(keys):  # Quit instructions if any key is pressed
-            waiting = False
-            intro_music.stop()
-            play_main_music()
-            break
-        display_instructions()
+                intro_music.stop()
+                play_music(gf_themesong)
 
-    # Caption and Icon
-    pygame.display.set_caption("Weirdmageddon")
-    icon = pygame.image.load("bill_cipher.png")
-    pygame.display.set_icon(icon)
-
-    # Player
-    playerImg = pygame.image.load(os.path.join("mabel_and_dipper.png"))  
-    playerX = (screen.get_width() - 200) // 2  # Center horizontally
-    playerY = screen.get_height() - 220  # Position near the bottom
+    # Load player
+    playerImg = load_asset(os.path.join(os.getcwd(), "mabel_and_dipper.png"))
+    playerX = (screen.get_width() - 200) // 2
+    playerY = screen.get_height() - 220
     playerX_change = 0
 
-    # Enemy
-    enemyImg = []
-    enemyX = []
-    enemyY = []
-    enemyX_change = []
-    enemyY_change = []
-    enemySize = []  # List to store enemy sizes
+    # Enemy setup
+    enemyImg = load_asset(os.path.join(os.getcwd(), "bill_cipher.png"))
+    enemies = []
     num_of_enemies = 6
 
-    def spawn_enemies(count=5):
-        nonlocal enemyImg, enemyX, enemyY, enemyX_change, enemyY_change, enemySize  # Ensure variables are accessible
-        for _ in range(count):
-            size = random.randint(150, 200)  # Increased size range for enemies
-            enemyX.append(random.randint(0, screen.get_width() - size))  # Adjust to fit screen width
-            enemyY.append(random.randint(50, 150))  
-            enemyX_change.append(random.choice([6, 7, 8, 9]))  # Increased speed for horizontal movement
-            enemyY_change.append(40)
-            enemySize.append(size)
-            enemyImg.append(pygame.image.load(os.path.join("bill_cipher.png")))  # Ensure the file is in an 'assets' folder
+    def spawn_enemies():
+        for _ in range(num_of_enemies):
+            size = random.randint(150, 200)
+            enemies.append({
+                "img": pygame.transform.scale(enemyImg, (size, size)),
+                "x": random.randint(0, screen.get_width() - size),
+                "y": random.randint(50, 150),
+                "x_change": random.choice([6, 7, 8, 9]),
+                "y_change": 40,
+                "size": size,
+            })
 
-    spawn_enemies(num_of_enemies)
+    spawn_enemies()
 
-    # Bullet
-    bulletImg = pygame.image.load("nyan_cat.png") 
+    # Bullet setup
+    bulletImg = load_asset(os.path.join(os.getcwd(), "nyan_cat.png"))
     bulletX = 0
-    bulletY = playerY  # Ensure playerY is defined
+    bulletY = playerY
     bulletY_change = 10
     bullet_state = "ready"
 
-    score_value = 0
+    # Score setup
+    score = 0
     font = pygame.font.Font('freesansbold.ttf', 32)
-    textX = 10
-    testY = 10
+
+    def show_score():
+        score_text = font.render(f"Score : {score}", True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
 
     # Game Over
-    over_font = pygame.font.Font('freesansbold.ttf', 64)
-        
-    def show_score(x, y):
-        score = font.render("Score : " + str(score_value), True, (255, 255, 255))
-        screen.blit(score, (x, y))
-
-    def game_over_text():
+    def game_over():
+        over_font = pygame.font.Font('freesansbold.ttf', 64)
         over_text = over_font.render("GAME OVER", True, (255, 255, 255))
         screen.blit(over_text, (screen.get_width() // 2 - over_text.get_width() // 2, screen.get_height() // 2 - over_text.get_height() // 2))
         pygame.display.update()
-        pygame.time.wait(3000)  # Wait for 3 seconds before exiting
+        pygame.time.wait(3000)
+        pygame.quit()
+        exit()
 
-    def player(x, y):
-        screen.blit(playerImg, (x, y))
-
-    def enemy(x, y, i):
-        screen.blit(enemyImg[i], (x, y))
-
+    # Fire bullet
     def fire_bullet(x, y):
-        global bullet_state  # Use global instead of nonlocal
+        global bullet_state
         bullet_state = "fire"
         screen.blit(bulletImg, (x + 16, y + 10))
 
-    def isCollision(enemyX, enemyY, bulletX, bulletY, size):
-        distance = math.sqrt(math.pow(enemyX - bulletX, 2) + (math.pow(enemyY - bulletY, 2)))
-        return distance < size // 2  # Adjust collision detection based on enemy size
+    # Check collision
+    def is_collision(enemy, bulletX, bulletY):
+        distance = math.sqrt(math.pow(enemy["x"] - bulletX, 2) + math.pow(enemy["y"] - bulletY, 2))
+        return distance < enemy["size"] // 2
 
-    def isGameOver(enemyX, enemyY, playerX, playerY):
-        player_collision_distance = 50  # Adjust based on player size
-        distance = math.sqrt(math.pow(enemyX - playerX, 2) + (math.pow(enemyY - playerY, 2)))
-        return distance < player_collision_distance
-    
-    def pixelated_burst(x, y):
-        particles = []
-        for _ in range(20):  # Number of particles
-            particle = {
-                "x": x,
-                "y": y,
-                "x_speed": random.uniform(-5, 5),  # Random horizontal speed
-                "y_speed": random.uniform(-5, 5),  # Random vertical speed
-                "size": random.randint(2, 5),  # Random size
-                "color": (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),  # Random color
-                "lifetime": random.randint(20, 50)  # Lifetime of the particle
-            }
-            particles.append(particle)
-        return particles
-
-    active_particles = []
-
+    # Game loop
     running = True
     while running:
         screen.fill((0, 0, 0))
-        screen.blit(background, (0, 0))  # Use the preloaded background image
+        screen.blit(background, (0, 0))
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -206,72 +156,56 @@ def main():
                     playerX_change = -5
                 if event.key == pygame.K_RIGHT:
                     playerX_change = 5
-                if event.key == pygame.K_SPACE:
-                    if bullet_state == "ready":
-                        bulletSound = mixer.Sound("laser.wav")  # Ensure the file is in an 'assets' folder
-                        bulletSound.set_volume(0.2)
-                        bulletSound.play()
-                        fire_bullet(playerX, bulletY)
-                if event.key == pygame.K_ESCAPE:
-                    running = False
+                if event.key == pygame.K_SPACE and bullet_state == "ready":
+                    laser_sound.play()
+                    bulletX = playerX
+                    fire_bullet(bulletX, bulletY)
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     playerX_change = 0
 
+        # Player movement
         playerX += playerX_change
-        if playerX <= 0:
-            playerX = 0
-        elif playerX >= screen.get_width() - 100:
-            playerX = screen.get_width() - 100
+        playerX = max(0, min(screen.get_width() - 100, playerX))  # Keep player within bounds
 
-        for i in range(len(enemyX)):
-            if isGameOver(enemyX[i], enemyY[i], playerX, playerY):
-                game_over_text()
-                running = False
-                break
+        # Enemy movement
+        for enemy in enemies:
+            enemy["x"] += enemy["x_change"]
+            if enemy["x"] <= 0 or enemy["x"] >= screen.get_width() - enemy["size"]:
+                enemy["x_change"] *= -1
+                enemy["y"] += enemy["y_change"]
 
-            enemyX[i] += enemyX_change[i]
-            if enemyX[i] <= 0:
-                enemyX_change[i] = random.choice([6, 7, 8, 9])
-                enemyY[i] += enemyY_change[i]
-            elif enemyX[i] >= screen.get_width() - enemySize[i]:
-                enemyX_change[i] = -random.choice([6, 7, 8, 9])
-            collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY, enemySize[i])
+            # Collision
+            if is_collision(enemy, bulletX, bulletY):
+                explosion_sound.play()
+                bullet_state = "ready"
+                bulletY = playerY
+                score += 1
+                enemy["x"] = random.randint(0, screen.get_width() - enemy["size"])
+                enemy["y"] = random.randint(50, 150)
 
-            if collision:
-                explosionSound = mixer.Sound(os.path.join("explosion.wav"))  
-                explosionSound.set_volume(0.3)
-                explosionSound.play()
-                active_particles.extend(pixelated_burst(enemyX[i], enemyY[i]))
-                score_value += 1
-                enemyY[i] = random.randint(50, 150)
-                enemySize[i] = random.randint(150, 200)
-                enemyX_change[i] = random.choice([6, 7, 8, 9])
-            enemy(enemyX[i], enemyY[i], i)
+            # Game over
+            if enemy["y"] > playerY:
+                game_over()
 
-        if bulletY < 0:
+            screen.blit(enemy["img"], (enemy["x"], enemy["y"]))
 
-            if collision:
-                explosionSound = mixer.Sound(os.path.join("explosion.wav"))  
-                explosionSound.set_volume(0.3)
-                explosionSound.play()
-                active_particles.extend(pixelated_burst(enemyX[i], enemyY[i]))  # Add particles to active list
-                score_value += 1
-                enemyY[i] = random.randint(50, 150)
-                enemySize[i] = random.randint(150, 200)  # Reassign a new size for the enemy
-                enemyX_change[i] = random.choice([6, 7, 8, 9])
-            enemy(enemyX[i], enemyY[i], i)
+        # Bullet movement
+        if bullet_state == "fire":
+            fire_bullet(bulletX, bulletY)
+            bulletY -= bulletY_change
 
         if bulletY <= 0:
             bulletY = playerY
             bullet_state = "ready"
-        if bullet_state == "fire":
-            bulletY -= bulletY_change
-            fire_bullet(bulletX, bulletY)
 
-        player(playerX, playerY)
-        show_score(textX, testY)
+        # Draw player and score
+        screen.blit(playerImg, (playerX, playerY))
+        show_score()
+
+        pygame.display.update()
+        clock.tick(60)
 
 if __name__ == "__main__":
     main()
