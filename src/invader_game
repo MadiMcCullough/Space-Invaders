@@ -16,9 +16,9 @@ def main():
     background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
 
     # Sound
-    mixer.music.load("theinside.wav")
+    mixer.music.load("gf_themesong.wav")
     mixer.music.play(-1)
-    mixer.music.set_volume(0.5)  # Set volume to 50%
+    mixer.music.set_volume(0.3)  
 
     # Display instructions before the game starts
     instructions_font = pygame.font.Font('freesansbold.ttf', 32)
@@ -29,9 +29,22 @@ def main():
         "Press any key to start the game."
     ]
 
+    # Play intro music
+    intro_music = mixer.Sound("intro_music.wav")
+    intro_music.play(-1)  # Loop the intro music
+
+    # Stop intro music and switch to game theme song once the game starts
+    def switch_to_game_music():
+        intro_music.stop()
+        mixer.music.load("gf_themesong.wav")
+        mixer.music.play(-1)
+        mixer.music.set_volume(0.3)
+
+  
+
     def display_instructions():
         screen.fill((0, 0, 0))
-        y_offset = 200
+        y_offset = (screen.get_height() - len(instructions_text) * 50) // 2  # Center vertically
         for line in instructions_text:
             text_surface = instructions_font.render(line, True, (255, 255, 255))
             text_rect = text_surface.get_rect(center=(screen.get_width() // 2, y_offset))
@@ -54,7 +67,7 @@ def main():
     # Caption and Icon
     pygame.display.set_caption("Space Invader")
     icon = pygame.image.load('bill_cipher.png')
-    icon = pygame.transform.scale(icon, (100, 100)) 
+    icon = pygame.transform.scale(icon, (50, 50)) 
     pygame.display.set_icon(icon)
 
     # Player
@@ -70,20 +83,24 @@ def main():
     enemyY = []
     enemyX_change = []
     enemyY_change = []
+    enemySize = []  # List to store enemy sizes
     num_of_enemies = 6
 
     for i in range(num_of_enemies):
-        enemyImg.append(pygame.image.load('bill_cipher.png'))
-        enemyX.append(random.randint(0, screen.get_width() - 64))  # Adjust to fit screen width
+        original_enemy_img = pygame.image.load('bill_cipher.png')
+        size = random.randint(150, 200)  # Increased size range for enemies
+        enemyImg.append(pygame.transform.scale(original_enemy_img, (size, size)))
+        enemyX.append(random.randint(0, screen.get_width() - size))  # Adjust to fit screen width
         enemyY.append(random.randint(50, 150))  # Ensure enemies appear near the top
         enemyX_change.append(4)
         enemyY_change.append(40)
+        enemySize.append(size)
 
     # Bullet
     # Ready - You can't see the bullet on the screen
     # Fire - The bullet is currently moving
     bulletImg = pygame.image.load('nyan_cat.png')
-    bulletImg = pygame.transform.scale(bulletImg, (100, 100))  # Resize the image to 32x32 pixels
+    bulletImg = pygame.transform.scale(bulletImg, (120, 120))  # Increased bullet size
     bulletX = 0
     bulletY = playerY
     bulletX_change = 0
@@ -120,9 +137,9 @@ def main():
         bullet_state = "fire"
         screen.blit(bulletImg, (x + 16, y + 10))
 
-    def isCollision(enemyX, enemyY, bulletX, bulletY):
+    def isCollision(enemyX, enemyY, bulletX, bulletY, size):
         distance = math.sqrt(math.pow(enemyX - bulletX, 2) + (math.pow(enemyY - bulletY, 2)))
-        return distance < 27
+        return distance < size // 2  # Adjust collision detection based on enemy size
 
     def isGameOver(enemyX, enemyY, playerX, playerY):
         # Check if enemy hits the bottom of the screen or the player
@@ -156,6 +173,10 @@ def main():
                         # Get the current x coordinate of the spaceship
                         bulletX = playerX
                         fire_bullet(bulletX, bulletY)
+
+                if event.key == pygame.K_ESCAPE:  # Exit the game when ESC is pressed
+                    running = False
+
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     playerX_change = 0
@@ -177,20 +198,23 @@ def main():
             if enemyX[i] <= 0:
                 enemyX_change[i] = 4
                 enemyY[i] += enemyY_change[i]
-            elif enemyX[i] >= screen.get_width() - 64:
+            elif enemyX[i] >= screen.get_width() - enemySize[i]:
                 enemyX_change[i] = -4
                 enemyY[i] += enemyY_change[i]
 
             # Collision
-            collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
+            collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY, enemySize[i])
             if collision:
                 explosionSound = mixer.Sound("explosion.wav")
                 explosionSound.play()
                 bulletY = playerY
                 bullet_state = "ready"
                 score_value += 1
-                enemyX[i] = random.randint(0, screen.get_width() - 64)
+                size = random.randint(150, 200)  # Generate new size for respawned enemy
+                enemyImg[i] = pygame.transform.scale(pygame.image.load('bill_cipher.png'), (size, size))
+                enemyX[i] = random.randint(0, screen.get_width() - size)
                 enemyY[i] = random.randint(50, 150)
+                enemySize[i] = size
 
             enemy(enemyX[i], enemyY[i], i)
 
