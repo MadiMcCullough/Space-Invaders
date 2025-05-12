@@ -4,7 +4,6 @@ import pygame
 from pygame import mixer
 from PIL import Image
 import os
-
 def main():
 
     # Initialize the pygame
@@ -13,10 +12,8 @@ def main():
     # Set the game to full screen
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-    background = pygame.image.load(os.path.join("background1.png"))
-    new_width = int(screen.get_width())
-    new_height = int(screen.get_height())
-    background = pygame.transform.scale(background, (new_width, new_height))
+    background = pygame.image.load(os.path.join(os.getcwd(), "background.png"))
+    background = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     screen.blit(background, (0, 0))
     pygame.display.update()
 
