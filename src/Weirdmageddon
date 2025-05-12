@@ -194,8 +194,32 @@ def main():
         win_sound.play()
         pygame.time.wait(3000)  # Wait for 3 seconds before exiting
 
+    def pixelated_burst(x, y):
+        # Create a pixelated burst effect
+        particles = []
+        for _ in range(50):  # Number of particles
+            particle_x = x + random.randint(-20, 20)
+            particle_y = y + random.randint(-20, 20)
+            particle_size = random.randint(2, 5)
+            particle_color = random.choice([(255, 0, 0), (255, 255, 0), (255, 165, 0)])  # Red, Yellow, Orange
+            particle_velocity = [random.uniform(-2, 2), random.uniform(-2, 2)]  # Random velocity for particles
+            particles.append((particle_x, particle_y, particle_size, particle_color, particle_velocity))
+        return particles
+
+    def draw_particles(particles):
+        for particle in particles[:]:  # Iterate over a copy of the list
+            pygame.draw.rect(screen, particle[3], (particle[0], particle[1], particle[2], particle[2]))
+            # Update particle position based on velocity
+            particle[0] += particle[4][0]
+            particle[1] += particle[4][1]
+            # Reduce particle size to simulate fading
+            particle[2] -= 0.1
+            if particle[2] <= 0:  # Remove particle if it becomes too small
+                particles.remove(particle)
+
     # Game Loop
     running = True
+    active_particles = []  # List to store active particles
     while running:
         # RGB = Red, Green, Blue
         screen.fill((0, 0, 0))
@@ -253,14 +277,10 @@ def main():
                 explosionSound = mixer.Sound("explosion.wav")
                 explosionSound.set_volume(0.3)
                 explosionSound.play()
+                active_particles.extend(pixelated_burst(enemyX[i], enemyY[i]))  # Add particles to active list
                 score_value += 1
-                if score_value % 20 == 0:  # Add 5 extra enemies every 20 points
-                    spawn_enemies(5)
-                size = random.randint(150, 200)
-                enemyImg[i] = pygame.transform.scale(pygame.image.load('bill_cipher.png'), (size, size))
-                enemyX[i] = random.randint(0, screen.get_width() - size)
                 enemyY[i] = random.randint(50, 150)
-                enemySize[i] = size
+                enemySize[i] = random.randint(150, 200)  # Reassign a new size for the enemy
                 enemyX_change[i] = random.choice([6, 7, 8, 9])
             enemy(enemyX[i], enemyY[i], i)
 
