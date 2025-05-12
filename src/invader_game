@@ -13,6 +13,7 @@ def main():
 
     # Background
     background = pygame.image.load('background.png')
+    background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
 
     # Sound
     mixer.music.load("theinside.wav")
@@ -56,9 +57,9 @@ def main():
 
     # Player
     playerImg = pygame.image.load('mabel_and_dipper.png')
-    playerImg = pygame.transform.scale(playerImg, (50, 50))  # Resize the image to 50x50 pixels
-    playerX = 370
-    playerY = 380
+    playerImg = pygame.transform.scale(playerImg, (200, 200))  # Resize the image to 200x200 pixels
+    playerX = (screen.get_width() - 200) // 2  # Center horizontally
+    playerY = screen.get_height() - 220  # Position near the bottom
     playerX_change = 0
 
     # Enemy
