@@ -194,32 +194,25 @@ def main():
         win_sound.play()
         pygame.time.wait(3000)  # Wait for 3 seconds before exiting
 
-    def pixelated_burst(x, y):
-        # Create a pixelated burst effect
-        particles = []
-        for _ in range(50):  # Number of particles
-            particle_x = x + random.randint(-20, 20)
-            particle_y = y + random.randint(-20, 20)
-            particle_size = random.randint(2, 5)
-            particle_color = random.choice([(255, 0, 0), (255, 255, 0), (255, 165, 0)])  # Red, Yellow, Orange
-            particle_velocity = [random.uniform(-2, 2), random.uniform(-2, 2)]  # Random velocity for particles
-            particles.append((particle_x, particle_y, particle_size, particle_color, particle_velocity))
-        return particles
-
-    def draw_particles(particles):
-        for particle in particles[:]:  # Iterate over a copy of the list
-            pygame.draw.rect(screen, particle[3], (particle[0], particle[1], particle[2], particle[2]))
-            # Update particle position based on velocity
-            particle[0] += particle[4][0]
-            particle[1] += particle[4][1]
-            # Reduce particle size to simulate fading
-            particle[2] -= 0.1
-            if particle[2] <= 0:  # Remove particle if it becomes too small
-                particles.remove(particle)
-
     # Game Loop
     running = True
     active_particles = []  # List to store active particles
+
+    def pixelated_burst(x, y):
+        # Generate a list of particles for the burst effect
+        particles = []
+        for _ in range(20):  # Number of particles
+            particle = {
+                "x": x,
+                "y": y,
+                "x_speed": random.uniform(-5, 5),  # Random horizontal speed
+                "y_speed": random.uniform(-5, 5),  # Random vertical speed
+                "size": random.randint(2, 5),  # Random size
+                "color": (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),  # Random color
+                "lifetime": random.randint(20, 50)  # Lifetime of the particle
+            }
+            particles.append(particle)
+        return particles
     while running:
         # RGB = Red, Green, Blue
         screen.fill((0, 0, 0))
