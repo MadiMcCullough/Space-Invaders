@@ -18,6 +18,37 @@ def main():
     mixer.music.load("theinside.wav")
     mixer.music.play(-1)
 
+    # Display instructions before the game starts
+    instructions_font = pygame.font.Font('freesansbold.ttf', 32)
+    instructions_text = [
+        "Welcome to Weirdmageddon!",
+        "Use LEFT and RIGHT arrow keys to move.",
+        "Press SPACE to shoot.",
+        "Press any key to start the game."
+    ]
+
+    def display_instructions():
+        screen.fill((0, 0, 0))
+        y_offset = 200
+        for line in instructions_text:
+            text_surface = instructions_font.render(line, True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(screen.get_width() // 2, y_offset))
+            screen.blit(text_surface, text_rect)
+            y_offset += 50
+        pygame.display.update()
+
+    display_instructions()
+
+    # Wait for the player to press any key to start
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                waiting = False
+
     # Caption and Icon
     pygame.display.set_caption("Space Invader")
     icon = pygame.image.load('bill_cipher.png')
