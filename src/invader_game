@@ -16,9 +16,22 @@ def main():
     background = pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
 
     # Sound
-    mixer.music.load("gf_themesong.wav")
-    mixer.music.play(-1)
-    mixer.music.set_volume(0.3)  
+    def play_main_music():
+        mixer.music.load("gf_themesong.wav")
+        mixer.music.play(-1)
+        mixer.music.set_volume(0.3)
+
+    # Play intro music
+    intro_music = mixer.Sound("intro_music.wav")
+    intro_music.play()
+
+  
+
+    # Event to trigger main music
+    def handle_music_events():
+        for event in pygame.event.get():
+            if event.type == pygame.USEREVENT + 1:
+                play_main_music()
 
     # Display instructions before the game starts
     instructions_font = pygame.font.Font('freesansbold.ttf', 32)
@@ -28,19 +41,6 @@ def main():
         "Press SPACE to shoot.",
         "Press any key to start the game."
     ]
-
-    # Play intro music
-    intro_music = mixer.Sound("intro_music.wav")
-    intro_music.play(-1)  # Loop the intro music
-
-    # Stop intro music and switch to game theme song once the game starts
-    def switch_to_game_music():
-        intro_music.stop()
-        mixer.music.load("gf_themesong.wav")
-        mixer.music.play(-1)
-        mixer.music.set_volume(0.3)
-
-  
 
     def display_instructions():
         screen.fill((0, 0, 0))
@@ -63,6 +63,9 @@ def main():
                 exit()
             if event.type == pygame.KEYDOWN:
                 waiting = False
+                intro_music.stop()  # Stop the intro music when instructions end
+                play_main_music()  # Start the main music after instructions
+
 
     # Caption and Icon
     pygame.display.set_caption("Space Invader")
