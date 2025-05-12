@@ -56,6 +56,7 @@ def main():
 
     # Player
     playerImg = pygame.image.load('mabel_and_dipper.png')
+    playerImg = pygame.transform.scale(playerImg, (50, 50))  # Resize the image to 50x50 pixels
     playerX = 370
     playerY = 380
     playerX_change = 0
