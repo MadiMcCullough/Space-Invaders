@@ -6,6 +6,12 @@ This code will create a game that resembles a shoot 'em up video game like *Spac
 
 The theme is centered around Disney's show *Gravity Falls* by Alex Hirsch. The show was very impactful for the children that grew up watching it and has inspired many artists to pursue a career in animation. 
 
+## URLS
+ - Video 
+  - 
+ - Github Repository
+  - https://github.com/MadiMcCullough/Weirdmageddon
+
 ## Gameplay
 - Use left and right arrows to move your player
 - Hit space to shoot
@@ -14,11 +20,9 @@ The theme is centered around Disney's show *Gravity Falls* by Alex Hirsch. The s
 - There is a way to win! It is a special number to Dipper and Mabel
 - If you get hit by a Bill you lose!
 
-## URLS
- - Video 
-  - 
- - Github Repository
-  - 
+## SRC contains:
+ - code for Weirdmageddon game
+ - any images or sounds used
 
 # Credits
 - Basic Space Invader's Game Code
