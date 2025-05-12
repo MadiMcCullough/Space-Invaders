@@ -93,6 +93,7 @@ def main():
                 waiting = False
                 intro_music.stop()  # Stop the intro music when instructions end
                 play_main_music()  # Start the main music after instructions
+                break  # Exit the loop immediately
         display_instructions()
 
     # Caption and Icon
